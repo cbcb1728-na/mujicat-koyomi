@@ -1,0 +1,409 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="干支変換">
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
+    <link rel="manifest" href="manifest.json">
+
+    <title>和暦↔西暦 変換ツール</title>
+    <style>
+        /* ライトモード（標準）のカラー */
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #334155;
+            --text-muted: #94a3b8;
+            --input-bg: #f1f5f9;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --error: #ef4444;
+            --border: #e2e8f0;
+        }
+
+        /* ダークモードのカラー */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #0f172a;
+                --card-bg: #1e293b;
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --input-bg: #334155;
+                --accent: #60a5fa;
+                --accent-hover: #3b82f6;
+                --border: #334155;
+            }
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            letter-spacing: 0.03em;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 35px 25px;
+            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.15);
+            box-sizing: border-box;
+            transition: background-color 0.3s;
+        }
+
+        h1 {
+            font-size: 1.3rem;
+            text-align: center;
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: var(--text-main);
+        }
+        
+        .converter-section {
+            margin-bottom: 35px;
+        }
+
+        h2 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .input-group span {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+            white-space: nowrap;
+        }
+
+        input[type="number"], input[type="text"] {
+            flex: 1;
+            min-width: 0;
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background-color: var(--input-bg);
+            color: var(--text-main);
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background-color: var(--card-bg);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        /* 結果表示スタイル */
+        .result-wrapper {
+            display: none;
+            margin-top: 15px;
+            padding: 16px;
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-text {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 6px;
+        }
+
+        .result-diff {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        .copy-btn {
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .error-msg {
+            color: var(--error);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 30px;
+            line-height: 1.6;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>和暦↔西暦 変換</h1>
+
+        <div class="converter-section">
+            <h2>西暦 から 和暦 へ</h2>
+            <div class="input-group">
+                <input type="number" id="seirekiInput" placeholder="例: 2026">
+                <span>年</span>
+            </div>
+            <div id="wError" class="error-msg">※慶長（1596年）より前の時代には対応していません。</div>
+            <div id="warekiResult" class="result-wrapper">
+                <div id="wText" class="result-text"></div>
+                <div id="wDiff" class="result-diff"></div>
+                <button id="wCopyBtn" class="copy-btn" onclick="copyFormatResult(this)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    数値コピー
+                </button>
+            </div>
+        </div>
+
+        <div class="converter-section">
+            <h2>和暦 から 西暦 へ</h2>
+            <div class="input-group">
+                <input type="text" id="gengoInput" placeholder="例: 令和" style="flex: 1.5;">
+                <input type="number" id="warekiInput" placeholder="例: 8" style="flex: 1;">
+                <span>年</span>
+            </div>
+            <div id="sError" class="error-msg">※元号が見つからないか、入力が正しくありません。</div>
+            <div id="seirekiResult" class="result-wrapper">
+                <div id="sText" class="result-text"></div>
+                <div id="sDiff" class="result-diff"></div>
+                <button id="sCopyBtn" class="copy-btn" onclick="copyFormatResult(this)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    数値コピー
+                </button>
+            </div>
+        </div>
+        
+        <div class="note">
+            ※和暦は漢字で入力してください（慶長〜令和）。<br>
+            ※年の途中の改元は、その元号が始まった西暦年を起点としています。
+        </div>
+    </div>
+
+    <script>
+        const currentYear = new Date().getFullYear();
+
+        const eras = [
+            { name: "令和", start: 2019 }, { name: "平成", start: 1989 }, { name: "昭和", start: 1926 }, { name: "大正", start: 1912 }, { name: "明治", start: 1868 },
+            { name: "慶応", start: 1865 }, { name: "元治", start: 1864 }, { name: "文久", start: 1861 }, { name: "万延", start: 1860 }, { name: "安政", start: 1854 },
+            { name: "嘉永", start: 1848 }, { name: "弘化", start: 1844 }, { name: "天保", start: 1830 }, { name: "文政", start: 1818 }, { name: "文化", start: 1804 },
+            { name: "享和", start: 1801 }, { name: "寛政", start: 1789 }, { name: "天明", start: 1781 }, { name: "安永", start: 1772 }, { name: "明和", start: 1764 },
+            { name: "宝暦", start: 1751 }, { name: "寛延", start: 1748 }, { name: "延享", start: 1744 }, { name: "寛保", start: 1741 }, { name: "元文", start: 1736 },
+            { name: "享保", start: 1716 }, { name: "正徳", start: 1711 }, { name: "宝永", start: 1704 }, { name: "元禄", start: 1688 }, { name: "貞享", start: 1684 },
+            { name: "天和", start: 1681 }, { name: "延宝", start: 1673 }, { name: "寛文", start: 1661 }, { name: "万治", start: 1658 }, { name: "明暦", start: 1655 },
+            { name: "承応", start: 1652 }, { name: "慶安", start: 1648 }, { name: "正保", start: 1644 }, { name: "寛永", start: 1624 }, { name: "元和", start: 1615 },
+            { name: "慶長", start: 1596 }
+        ];
+
+        const jikkan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
+        const jikkanYomi = ["かのえ", "かのと", "みずのえ", "みずのと", "きのえ", "きのと", "ひのえ", "ひのと", "つちのえ", "つちのと"];
+        const junishi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
+        const junishiYomi = ["さる", "とり", "いぬ", "い", "ね", "うし", "とら", "う", "たつ", "み", "うま", "ひつじ"];
+
+        // アラビア数字を漢数字に変換する関数（年用）
+        function toKanjiYear(num) {
+            if (num === 1) return "元";
+            
+            const kanji = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+            if (num < 10) return kanji[num];
+            
+            const tens = Math.floor(num / 10);
+            const ones = num % 10;
+            
+            let tensStr = tens === 1 ? "十" : kanji[tens] + "十";
+            let onesStr = kanji[ones];
+            
+            return tensStr + onesStr;
+        }
+
+        window.onload = () => {
+            document.getElementById('seirekiInput').value = currentYear;
+            
+            let currentEra = eras[0];
+            for (let era of eras) {
+                if (currentYear >= era.start) {
+                    currentEra = era;
+                    break;
+                }
+            }
+            document.getElementById('gengoInput').value = currentEra.name;
+            document.getElementById('warekiInput').value = currentYear - currentEra.start + 1;
+
+            convertToWareki();
+            convertToSeireki();
+        };
+
+        document.getElementById('seirekiInput').addEventListener('input', convertToWareki);
+        document.getElementById('gengoInput').addEventListener('input', convertToSeireki);
+        document.getElementById('warekiInput').addEventListener('input', convertToSeireki);
+
+        function getKanshi(year) {
+            return {
+                kanji: `${jikkan[year % 10]}${junishi[year % 12]}`,
+                yomi: `${jikkanYomi[year % 10]}${junishiYomi[year % 12]}`
+            };
+        }
+
+        function formatGannen(gengo, year) {
+            return year === 1 ? `${gengo}元年` : `${gengo}${year}年`;
+        }
+
+        function getDiffText(targetYear) {
+            const diff = currentYear - targetYear;
+            if (diff === 0) return "今年";
+            return diff > 0 ? `現在から ${diff} 年前` : `現在から ${Math.abs(diff)} 年後`;
+        }
+
+        function convertToWareki() {
+            const yearStr = document.getElementById('seirekiInput').value;
+            const year = parseInt(yearStr);
+            const resultBox = document.getElementById('warekiResult');
+            const errorBox = document.getElementById('wError');
+
+            if (!yearStr || isNaN(year)) {
+                resultBox.style.display = 'none';
+                errorBox.style.display = 'none';
+                return;
+            }
+
+            if (year < 1596) {
+                resultBox.style.display = 'none';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            errorBox.style.display = 'none';
+            let wareki = "";
+            let eraName = "";
+            let eraYear = 0;
+
+            for (let i = 0; i < eras.length; i++) {
+                if (year >= eras[i].start) {
+                    eraName = eras[i].name;
+                    eraYear = year - eras[i].start + 1;
+                    wareki = formatGannen(eraName, eraYear);
+                    break;
+                }
+            }
+
+            const kanshi = getKanshi(year);
+            document.getElementById('wText').innerText = `${wareki} ／ ${kanshi.kanji}（${kanshi.yomi}）`;
+            document.getElementById('wDiff').innerText = getDiffText(year);
+            
+            // コピー用テキストをボタンに保存
+            const copyFormat = `${eraName}${toKanjiYear(eraYear)}（${year}）年`;
+            document.getElementById('wCopyBtn').dataset.copyText = copyFormat;
+
+            resultBox.style.display = 'block';
+        }
+
+        function convertToSeireki() {
+            const gengoName = document.getElementById('gengoInput').value.trim();
+            const yearStr = document.getElementById('warekiInput').value;
+            const year = parseInt(yearStr);
+            
+            const resultBox = document.getElementById('seirekiResult');
+            const errorBox = document.getElementById('sError');
+
+            if (!gengoName || !yearStr || isNaN(year) || year < 1) {
+                resultBox.style.display = 'none';
+                errorBox.style.display = 'none';
+                return;
+            }
+
+            const targetEra = eras.find(era => era.name === gengoName);
+            
+            if (!targetEra) {
+                resultBox.style.display = 'none';
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            errorBox.style.display = 'none';
+            const seireki = targetEra.start + year - 1;
+            const kanshi = getKanshi(seireki);
+            
+            document.getElementById('sText').innerText = `${seireki}年 ／ ${kanshi.kanji}（${kanshi.yomi}）`;
+            document.getElementById('sDiff').innerText = getDiffText(seireki);
+            
+            // コピー用テキストをボタンに保存
+            const copyFormat = `${targetEra.name}${toKanjiYear(year)}（${seireki}）年`;
+            document.getElementById('sCopyBtn').dataset.copyText = copyFormat;
+
+            resultBox.style.display = 'block';
+        }
+
+        // 論文用フォーマットでコピーする機能
+        function copyFormatResult(btnElement) {
+            const textToCopy = btnElement.dataset.copyText;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                const originalHTML = btnElement.innerHTML;
+                btnElement.innerHTML = "✓ コピーしました";
+                btnElement.style.backgroundColor = "var(--accent)";
+                btnElement.style.color = "#fff";
+                
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHTML;
+                    btnElement.style.backgroundColor = "";
+                    btnElement.style.color = "";
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
