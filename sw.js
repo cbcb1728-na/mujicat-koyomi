@@ -2,8 +2,8 @@
 const urlsToCache = [
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
+  './icon-192.PNG',
+  './icon-512.PNG',
   'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js'
 ];
 
@@ -28,4 +28,5 @@ self.addEventListener('fetch', function(event) {
         return fetch(event.request); // ネットワークから取得
       })
   );
+
 });
