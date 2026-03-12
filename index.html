@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -9,17 +9,12 @@
     <meta name="apple-mobile-web-app-title" content="干支変換">
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    <link rel="manifest" href="manifest.json">
-
-
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
     
-    <title>和暦↔西暦 変換ツール</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
+    <title>Koyomi Muji</title>
     <style>
-        /* ライトモード（標準）のカラー */
         :root {
             --bg-color: #f8fafc;
             --card-bg: #ffffff;
@@ -32,7 +27,6 @@
             --border: #e2e8f0;
         }
 
-        /* ダークモードのカラー */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #0f172a;
@@ -60,7 +54,7 @@
 
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 400px;
             background: var(--card-bg);
             border-radius: 20px;
             padding: 35px 25px;
@@ -70,7 +64,7 @@
         }
 
         h1 {
-            font-size: 1.3rem;
+            font-size: 1.00rem;
             text-align: center;
             font-weight: 600;
             margin-top: 0;
@@ -80,6 +74,13 @@
         
         .converter-section {
             margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px dashed var(--border);
+        }
+        .converter-section:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         h2 {
@@ -91,13 +92,13 @@
 
         .input-group {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
             margin-bottom: 10px;
         }
         
         .input-group span {
-            font-size: 0.95rem;
+            font-size: 0.85rem;
             font-weight: 500;
             color: var(--text-main);
             white-space: nowrap;
@@ -106,14 +107,15 @@
         input[type="number"], input[type="text"] {
             flex: 1;
             min-width: 0;
-            padding: 14px 16px;
-            font-size: 1rem;
+            padding: 12px 10px;
+            font-size: 0.9rem;
             border: 2px solid transparent;
             border-radius: 12px;
             background-color: var(--input-bg);
             color: var(--text-main);
             transition: all 0.2s ease;
             box-sizing: border-box;
+            text-align: center;
         }
         
         input:focus {
@@ -123,7 +125,6 @@
             box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
         }
 
-        /* 結果表示スタイル */
         .result-wrapper {
             display: none;
             margin-top: 15px;
@@ -132,7 +133,6 @@
             border-radius: 12px;
             text-align: center;
             animation: fadeIn 0.3s ease;
-            position: relative;
         }
 
         @keyframes fadeIn {
@@ -141,14 +141,15 @@
         }
 
         .result-text {
-            font-size: 1.15rem;
+            font-size: 0.90rem;
             font-weight: 600;
             color: var(--accent);
             margin-bottom: 6px;
+            line-height: 1.4;
         }
 
         .result-diff {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             margin-bottom: 12px;
         }
@@ -158,7 +159,7 @@
             color: var(--text-main);
             border: 1px solid var(--border);
             padding: 8px 16px;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             border-radius: 20px;
             cursor: pointer;
@@ -174,13 +175,9 @@
             border-color: var(--accent);
         }
         
-        .copy-btn:active {
-            transform: scale(0.95);
-        }
-
         .error-msg {
             color: var(--error);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             margin-top: 10px;
             display: none;
         }
@@ -188,242 +185,348 @@
         .note {
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: 30px;
+            margin-top: 20px;
             line-height: 1.6;
-            text-align: center;
-            border-top: 1px solid var(--border);
-            padding-top: 20px;
+            text-align: left;
+            padding: 12px 16px; /* 上下・左右に少し余白を作る */
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>和暦↔西暦 変換</h1>
+        <h1>暦 おおざっぱ変換</h1>
 
         <div class="converter-section">
             <h2>西暦 から 和暦 へ</h2>
             <div class="input-group">
-                <input type="number" id="seirekiInput" placeholder="例: 2026">
+                <input type="number" id="seirekiInput" placeholder="例: 2026" style="text-align: left; padding-left: 14px;">
                 <span>年</span>
             </div>
-            <div id="wError" class="error-msg">※慶長（1596年）より前の時代には対応していません。</div>
+            <div id="wError" class="error-msg">※大化（645年）以前は未対応です。</div>
             <div id="warekiResult" class="result-wrapper">
                 <div id="wText" class="result-text"></div>
                 <div id="wDiff" class="result-diff"></div>
-                <button id="wCopyBtn" class="copy-btn" onclick="copyFormatResult(this)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    数値コピー
-                </button>
+                <button id="wCopyBtn" class="copy-btn" onclick="copyFormatResult(this)">数値コピー</button>
             </div>
         </div>
 
         <div class="converter-section">
             <h2>和暦 から 西暦 へ</h2>
             <div class="input-group">
-                <input type="text" id="gengoInput" placeholder="例: 令和" style="flex: 1.5;">
-                <input type="number" id="warekiInput" placeholder="例: 8" style="flex: 1;">
+                <input type="text" id="gengoInput" placeholder="元号" style="flex: 1.2;">
+                <input type="text" id="zodiacInput" placeholder="干支" style="flex: 1.2;">
+                <input type="number" id="warekiInput" placeholder="年数" style="flex: 1;">
                 <span>年</span>
             </div>
-            <div id="sError" class="error-msg">※元号が見つからないか、入力が正しくありません。</div>
+            <div id="sError" class="error-msg">※入力が正しくありません。</div>
             <div id="seirekiResult" class="result-wrapper">
                 <div id="sText" class="result-text"></div>
                 <div id="sDiff" class="result-diff"></div>
-                <button id="sCopyBtn" class="copy-btn" onclick="copyFormatResult(this)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    数値コピー
-                </button>
+                <button id="sCopyBtn" class="copy-btn" onclick="copyFormatResult(this)">数値コピー</button>
             </div>
         </div>
-        
+
         <div class="note">
-            ※和暦は漢字で入力してください（慶長〜令和）。<br>
+            ※和暦や干支は漢字で入力してください。<br>
+            ※和暦→西暦は「元号＋年数」または「元号＋干支」の入力で自動変換されます。<br>
             ※年の途中の改元は、その元号が始まった西暦年を起点としています。
         </div>
     </div>
 
     <script>
-        const currentYear = new Date().getFullYear();
+const currentYear = new Date().getFullYear();
 
-        const eras = [
-            { name: "令和", start: 2019 }, { name: "平成", start: 1989 }, { name: "昭和", start: 1926 }, { name: "大正", start: 1912 }, { name: "明治", start: 1868 },
-            { name: "慶応", start: 1865 }, { name: "元治", start: 1864 }, { name: "文久", start: 1861 }, { name: "万延", start: 1860 }, { name: "安政", start: 1854 },
-            { name: "嘉永", start: 1848 }, { name: "弘化", start: 1844 }, { name: "天保", start: 1830 }, { name: "文政", start: 1818 }, { name: "文化", start: 1804 },
-            { name: "享和", start: 1801 }, { name: "寛政", start: 1789 }, { name: "天明", start: 1781 }, { name: "安永", start: 1772 }, { name: "明和", start: 1764 },
-            { name: "宝暦", start: 1751 }, { name: "寛延", start: 1748 }, { name: "延享", start: 1744 }, { name: "寛保", start: 1741 }, { name: "元文", start: 1736 },
-            { name: "享保", start: 1716 }, { name: "正徳", start: 1711 }, { name: "宝永", start: 1704 }, { name: "元禄", start: 1688 }, { name: "貞享", start: 1684 },
-            { name: "天和", start: 1681 }, { name: "延宝", start: 1673 }, { name: "寛文", start: 1661 }, { name: "万治", start: 1658 }, { name: "明暦", start: 1655 },
-            { name: "承応", start: 1652 }, { name: "慶安", start: 1648 }, { name: "正保", start: 1644 }, { name: "寛永", start: 1624 }, { name: "元和", start: 1615 },
-            { name: "慶長", start: 1596 }
-        ];
+// 統一・北朝系の元号リスト（変更なし）
+const eras = [
+    { name: "令和", start: 2019 }, { name: "平成", start: 1989 }, { name: "昭和", start: 1926 }, { name: "大正", start: 1912 }, { name: "明治", start: 1868 },
+    { name: "慶応", start: 1865 }, { name: "元治", start: 1864 }, { name: "文久", start: 1861 }, { name: "万延", start: 1860 }, { name: "安政", start: 1854 },
+    { name: "嘉永", start: 1848 }, { name: "弘化", start: 1844 }, { name: "天保", start: 1830 }, { name: "文政", start: 1818 }, { name: "文化", start: 1804 },
+    { name: "享和", start: 1801 }, { name: "寛政", start: 1789 }, { name: "天明", start: 1781 }, { name: "安永", start: 1772 }, { name: "明和", start: 1764 },
+    { name: "宝暦", start: 1751 }, { name: "寛延", start: 1748 }, { name: "延享", start: 1744 }, { name: "寛保", start: 1741 }, { name: "元文", start: 1736 },
+    { name: "享保", start: 1716 }, { name: "正徳", start: 1711 }, { name: "宝永", start: 1704 }, { name: "元禄", start: 1688 }, { name: "貞享", start: 1684 },
+    { name: "天和", start: 1681 }, { name: "延宝", start: 1673 }, { name: "寛文", start: 1661 }, { name: "万治", start: 1658 }, { name: "明暦", start: 1655 },
+    { name: "承応", start: 1652 }, { name: "慶安", start: 1648 }, { name: "正保", start: 1644 }, { name: "寛永", start: 1624 }, { name: "元和", start: 1615 },
+    { name: "慶長", start: 1596 }, { name: "文禄", start: 1593 }, { name: "天正", start: 1573 }, { name: "元亀", start: 1570 }, { name: "永禄", start: 1558 }, 
+    { name: "弘治", start: 1555 }, { name: "天文", start: 1532 }, { name: "享禄", start: 1528 }, { name: "大永", start: 1521 }, { name: "永正", start: 1504 }, 
+    { name: "文亀", start: 1501 }, { name: "明応", start: 1492 }, { name: "延徳", start: 1489 }, { name: "長享", start: 1487 }, { name: "文明", start: 1469 }, 
+    { name: "応仁", start: 1467 }, { name: "文正", start: 1466 }, { name: "寛正", start: 1460 }, { name: "長禄", start: 1457 }, { name: "康正", start: 1455 }, 
+    { name: "享徳", start: 1452 }, { name: "宝徳", start: 1449 }, { name: "文安", start: 1444 }, { name: "嘉吉", start: 1441 }, { name: "永享", start: 1429 }, 
+    { name: "正長", start: 1428 }, { name: "応永", start: 1394 }, { name: "明徳", start: 1390 }, { name: "康応", start: 1389 }, { name: "嘉慶", start: 1387 }, 
+    { name: "至徳", start: 1384 }, { name: "永徳", start: 1381 }, { name: "康暦", start: 1379 }, { name: "永和", start: 1375 }, { name: "応安", start: 1368 }, 
+    { name: "貞治", start: 1362 }, { name: "康安", start: 1361 }, { name: "延文", start: 1356 }, { name: "文和", start: 1352 }, { name: "観応", start: 1350 }, 
+    { name: "貞和", start: 1345 }, { name: "康永", start: 1342 }, { name: "暦応", start: 1338 }, { name: "建武", start: 1334 }, { name: "正慶", start: 1332 }, 
+    { name: "元弘", start: 1331 }, { name: "元徳", start: 1329 }, { name: "嘉暦", start: 1326 }, { name: "正中", start: 1324 }, { name: "元亨", start: 1321 }, 
+    { name: "元応", start: 1319 }, { name: "文保", start: 1317 }, { name: "正和", start: 1312 }, { name: "応長", start: 1311 }, { name: "延慶", start: 1308 }, 
+    { name: "徳治", start: 1306 }, { name: "嘉元", start: 1303 }, { name: "乾元", start: 1302 }, { name: "正安", start: 1299 }, { name: "永仁", start: 1293 }, 
+    { name: "正応", start: 1288 }, { name: "弘安", start: 1278 }, { name: "建治", start: 1275 }, { name: "文永", start: 1264 }, { name: "弘長", start: 1261 }, 
+    { name: "文応", start: 1260 }, { name: "正嘉", start: 1257 }, { name: "康元", start: 1256 }, { name: "建長", start: 1249 }, { name: "宝治", start: 1247 }, 
+    { name: "寛元", start: 1243 }, { name: "仁治", start: 1240 }, { name: "延応", start: 1239 }, { name: "暦仁", start: 1238 }, { name: "嘉禎", start: 1235 }, 
+    { name: "文暦", start: 1234 }, { name: "天福", start: 1233 }, { name: "貞永", start: 1232 }, { name: "寛喜", start: 1229 }, { name: "安貞", start: 1227 }, 
+    { name: "嘉禄", start: 1225 }, { name: "元仁", start: 1224 }, { name: "貞応", start: 1222 }, { name: "承久", start: 1219 }, { name: "建保", start: 1214 }, 
+    { name: "建暦", start: 1211 }, { name: "承元", start: 1207 }, { name: "建永", start: 1206 }, { name: "元久", start: 1204 }, { name: "建仁", start: 1201 }, 
+    { name: "正治", start: 1199 }, { name: "建久", start: 1190 }, { name: "文治", start: 1185 }, { name: "元暦", start: 1184 }, { name: "寿永", start: 1182 }, 
+    { name: "養和", start: 1181 }, { name: "治承", start: 1177 }, { name: "安元", start: 1175 }, { name: "承安", start: 1171 }, { name: "嘉応", start: 1169 }, 
+    { name: "仁安", start: 1166 }, { name: "永万", start: 1165 }, { name: "長寛", start: 1163 }, { name: "応保", start: 1161 }, { name: "永暦", start: 1160 }, 
+    { name: "平治", start: 1159 }, { name: "保元", start: 1156 }, { name: "久寿", start: 1154 }, { name: "仁平", start: 1151 }, { name: "久安", start: 1145 }, 
+    { name: "天養", start: 1144 }, { name: "康治", start: 1142 }, { name: "永治", start: 1141 }, { name: "保延", start: 1135 }, { name: "長承", start: 1132 }, 
+    { name: "天承", start: 1131 }, { name: "大治", start: 1126 }, { name: "天治", start: 1124 }, { name: "保安", start: 1120 }, { name: "元永", start: 1118 }, 
+    { name: "永久", start: 1113 }, { name: "天永", start: 1110 }, { name: "天仁", start: 1108 }, { name: "嘉承", start: 1106 }, { name: "長治", start: 1104 }, 
+    { name: "康和", start: 1099 }, { name: "承徳", start: 1097 }, { name: "永長", start: 1097 }, { name: "嘉保", start: 1095 }, { name: "寛治", start: 1087 }, 
+    { name: "応徳", start: 1084 }, { name: "永保", start: 1081 }, { name: "承暦", start: 1077 }, { name: "承保", start: 1074 }, { name: "延久", start: 1069 }, 
+    { name: "治暦", start: 1065 }, { name: "康平", start: 1058 }, { name: "天喜", start: 1053 }, { name: "永承", start: 1046 }, { name: "寛徳", start: 1044 }, 
+    { name: "長久", start: 1040 }, { name: "長暦", start: 1037 }, { name: "長元", start: 1028 }, { name: "万寿", start: 1024 }, { name: "治安", start: 1021 }, 
+    { name: "寛仁", start: 1017 }, { name: "長和", start: 1013 }, { name: "寛弘", start: 1004 }, { name: "長保", start: 999 }, { name: "長徳", start: 995 }, 
+    { name: "正暦", start: 990 }, { name: "永祚", start: 989 }, { name: "永延", start: 987 }, { name: "寛和", start: 985 }, { name: "永観", start: 983 }, 
+    { name: "天元", start: 978 }, { name: "貞元", start: 976 }, { name: "天延", start: 974 }, { name: "天禄", start: 970 }, { name: "安和", start: 968 }, 
+    { name: "康保", start: 964 }, { name: "応和", start: 961 }, { name: "天徳", start: 957 }, { name: "天暦", start: 947 }, { name: "天慶", start: 938 }, 
+    { name: "承平", start: 931 }, { name: "延長", start: 923 }, { name: "延喜", start: 901 }, { name: "昌泰", start: 898 }, { name: "寛平", start: 889 }, 
+    { name: "仁和", start: 885 }, { name: "元慶", start: 877 }, { name: "貞観", start: 859 }, { name: "天安", start: 857 }, { name: "斉衡", start: 854 }, 
+    { name: "仁寿", start: 851 }, { name: "嘉祥", start: 848 }, { name: "承和", start: 834 }, { name: "天長", start: 824 }, { name: "弘仁", start: 810 }, 
+    { name: "大同", start: 806 }, { name: "延暦", start: 782 }, { name: "天応", start: 781 }, { name: "宝亀", start: 770 }, { name: "神護景雲", start: 767 }, 
+    { name: "天平神護", start: 765 }, { name: "天平宝字", start: 757 }, { name: "天平勝宝", start: 749 }, { name: "天平感宝", start: 749 }, { name: "天平", start: 729 }, 
+    { name: "神亀", start: 724 }, { name: "養老", start: 717 }, { name: "霊亀", start: 715 }, { name: "和銅", start: 708 }, { name: "慶雲", start: 704 }, 
+    { name: "大宝", start: 701 }, { name: "朱鳥", start: 686 }, { name: "白雉", start: 650 }, { name: "大化", start: 645 }
+];
 
-        const jikkan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
-        const jikkanYomi = ["かのえ", "かのと", "みずのえ", "みずのと", "きのえ", "きのと", "ひのえ", "ひのと", "つちのえ", "つちのと"];
-        const junishi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
-        const junishiYomi = ["さる", "とり", "いぬ", "い", "ね", "うし", "とら", "う", "たつ", "み", "うま", "ひつじ"];
+// 南朝独自の元号（変更なし）
+const southEras = [
+    { name: "元中", start: 1384, end: 1392 }, { name: "弘和", start: 1381, end: 1384 }, { name: "天授", start: 1375, end: 1381 }, { name: "文中", start: 1372, end: 1375 },
+    { name: "建徳", start: 1370, end: 1372 }, { name: "正平", start: 1346, end: 1370 }, { name: "興国", start: 1340, end: 1346 }, { name: "延元", start: 1336, end: 1340 }
+];
 
-        // アラビア数字を漢数字に変換する関数（年用）
-        function toKanjiYear(num) {
-            if (num === 1) return "元";
-            
-            const kanji = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
-            if (num < 10) return kanji[num];
-            
-            const tens = Math.floor(num / 10);
-            const ones = num % 10;
-            
-            let tensStr = tens === 1 ? "十" : kanji[tens] + "十";
-            let onesStr = kanji[ones];
-            
-            return tensStr + onesStr;
-        }
+// 干支の漢字と読み方を定義
+const jikkan = ["庚", "辛", "壬", "癸", "甲", "乙", "丙", "丁", "戊", "己"];
+const jikkanYomi = ["かのえ", "かのと", "みずのえ", "みずのと", "きのえ", "きのと", "ひのえ", "ひのと", "つちのえ", "つちのと"];
+const junishi = ["申", "酉", "戌", "亥", "子", "丑", "寅", "卯", "辰", "巳", "午", "未"];
+const junishiYomi = ["さる", "とり", "いぬ", "い", "ね", "うし", "とら", "う", "たつ", "み", "うま", "ひつじ"];
 
-        window.onload = () => {
-            document.getElementById('seirekiInput').value = currentYear;
-            
-            let currentEra = eras[0];
-            for (let era of eras) {
-                if (currentYear >= era.start) {
-                    currentEra = era;
-                    break;
-                }
+function toKanjiYear(num) {
+    if (num === 1) return "元";
+    const kanji = ["", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+    if (num < 10) return kanji[num];
+    const tens = Math.floor(num / 10);
+    const ones = num % 10;
+    return (tens === 1 ? "十" : kanji[tens] + "十") + kanji[ones];
+}
+
+window.onload = () => {
+    document.getElementById('seirekiInput').value = currentYear;
+    let currentEra = eras.find(e => currentYear >= e.start) || eras[0];
+    document.getElementById('gengoInput').value = currentEra.name;
+    document.getElementById('warekiInput').value = currentYear - currentEra.start + 1;
+
+    convertToWareki();
+    convertToSeirekiUnified();
+};
+
+document.getElementById('seirekiInput').addEventListener('input', convertToWareki);
+document.getElementById('gengoInput').addEventListener('input', convertToSeirekiUnified);
+document.getElementById('zodiacInput').addEventListener('input', convertToSeirekiUnified);
+document.getElementById('warekiInput').addEventListener('input', convertToSeirekiUnified);
+
+// 干支とその読み方を取得する関数
+function getKanshi(year) {
+    const jIndex = year % 10;
+    const juIndex = year % 12;
+    return { 
+        kanji: `${jikkan[jIndex]}${junishi[juIndex]}`,
+        yomi: `${jikkanYomi[jIndex]}${junishiYomi[juIndex]}`
+    };
+}
+
+function getDiffText(targetYear) {
+    const diff = currentYear - targetYear;
+    if (diff === 0) return "今年";
+    return diff > 0 ? `現在から ${diff} 年前` : `現在から ${Math.abs(diff)} 年後`;
+}
+
+// 1. 西暦 → 和暦
+function convertToWareki() {
+    const year = parseInt(document.getElementById('seirekiInput').value);
+    const resultBox = document.getElementById('warekiResult');
+    const errorBox = document.getElementById('wError');
+
+    if (isNaN(year)) return hide(resultBox, errorBox);
+    if (year < 645) {
+        document.getElementById('wError').innerText = "※大化（645年）以前は未対応です。";
+        return showError(resultBox, errorBox);
+    }
+    
+    let isBlank = false;
+    if ((year >= 655 && year <= 685) || (year >= 687 && year <= 700)) {
+        isBlank = true;
+    }
+
+    let mainEraStr = "";
+    let copyText = "";
+
+    if (isBlank) {
+        mainEraStr = "（元号なし）";
+        copyText = `（${year}）年`;
+    } else {
+        let eraName = "", eraYear = 0;
+        for (let i = 0; i < eras.length; i++) {
+            if (year >= eras[i].start) {
+                eraName = eras[i].name;
+                eraYear = year - eras[i].start + 1;
+                break;
             }
-            document.getElementById('gengoInput').value = currentEra.name;
-            document.getElementById('warekiInput').value = currentYear - currentEra.start + 1;
-
-            convertToWareki();
-            convertToSeireki();
-        };
-
-        document.getElementById('seirekiInput').addEventListener('input', convertToWareki);
-        document.getElementById('gengoInput').addEventListener('input', convertToSeireki);
-        document.getElementById('warekiInput').addEventListener('input', convertToSeireki);
-
-        function getKanshi(year) {
-            return {
-                kanji: `${jikkan[year % 10]}${junishi[year % 12]}`,
-                yomi: `${jikkanYomi[year % 10]}${junishiYomi[year % 12]}`
-            };
         }
+        mainEraStr = eraYear === 1 ? `${eraName}元年` : `${eraName}${eraYear}年`;
+        copyText = `${eraName}${toKanjiYear(eraYear)}（${year}）年`;
+    }
 
-        function formatGannen(gengo, year) {
-            return year === 1 ? `${gengo}元年` : `${gengo}${year}年`;
-        }
-
-        function getDiffText(targetYear) {
-            const diff = currentYear - targetYear;
-            if (diff === 0) return "今年";
-            return diff > 0 ? `現在から ${diff} 年前` : `現在から ${Math.abs(diff)} 年後`;
-        }
-
-        function convertToWareki() {
-            const yearStr = document.getElementById('seirekiInput').value;
-            const year = parseInt(yearStr);
-            const resultBox = document.getElementById('warekiResult');
-            const errorBox = document.getElementById('wError');
-
-            if (!yearStr || isNaN(year)) {
-                resultBox.style.display = 'none';
-                errorBox.style.display = 'none';
-                return;
+    let southEraStr = "";
+    if (year >= 1336 && year <= 1392) {
+        for (let i = 0; i < southEras.length; i++) {
+            if (year >= southEras[i].start) {
+                let sYear = year - southEras[i].start + 1;
+                southEraStr = sYear === 1 ? `${southEras[i].name}元年` : `${southEras[i].name}${sYear}年`;
+                break;
             }
-
-            if (year < 1596) {
-                resultBox.style.display = 'none';
-                errorBox.style.display = 'block';
-                return;
-            }
-
-            errorBox.style.display = 'none';
-            let wareki = "";
-            let eraName = "";
-            let eraYear = 0;
-
-            for (let i = 0; i < eras.length; i++) {
-                if (year >= eras[i].start) {
-                    eraName = eras[i].name;
-                    eraYear = year - eras[i].start + 1;
-                    wareki = formatGannen(eraName, eraYear);
-                    break;
-                }
-            }
-
-            const kanshi = getKanshi(year);
-            document.getElementById('wText').innerText = `${wareki} ／ ${kanshi.kanji}（${kanshi.yomi}）`;
-            document.getElementById('wDiff').innerText = getDiffText(year);
-            
-            // コピー用テキストをボタンに保存
-            const copyFormat = `${eraName}${toKanjiYear(eraYear)}（${year}）年`;
-            document.getElementById('wCopyBtn').dataset.copyText = copyFormat;
-
-            resultBox.style.display = 'block';
         }
+    }
 
-        function convertToSeireki() {
-            const gengoName = document.getElementById('gengoInput').value.trim();
-            const yearStr = document.getElementById('warekiInput').value;
-            const year = parseInt(yearStr);
-            
-            const resultBox = document.getElementById('seirekiResult');
-            const errorBox = document.getElementById('sError');
+    let displayText = mainEraStr;
+    if (southEraStr) {
+        displayText = `北朝: ${mainEraStr}<br>南朝: ${southEraStr}`;
+    }
 
-            if (!gengoName || !yearStr || isNaN(year) || year < 1) {
-                resultBox.style.display = 'none';
-                errorBox.style.display = 'none';
-                return;
-            }
+    const kanshi = getKanshi(year);
+    // 読み方（フリガナ）を追加表示
+    document.getElementById('wText').innerHTML = `${displayText} ／ ${kanshi.kanji}（${kanshi.yomi}）`;
+    document.getElementById('wDiff').innerText = getDiffText(year);
+    document.getElementById('wCopyBtn').dataset.copyText = copyText;
+    showResult(resultBox, errorBox);
+}
 
-            const targetEra = eras.find(era => era.name === gengoName);
-            
-            if (!targetEra) {
-                resultBox.style.display = 'none';
-                errorBox.style.display = 'block';
-                return;
-            }
+// 2. 和暦・干支 → 西暦
+function convertToSeirekiUnified() {
+    const gengoName = document.getElementById('gengoInput').value.trim();
+    const zodiacStr = document.getElementById('zodiacInput').value.trim();
+    const yearNum = parseInt(document.getElementById('warekiInput').value);
 
-            errorBox.style.display = 'none';
-            const seireki = targetEra.start + year - 1;
-            const kanshi = getKanshi(seireki);
-            
-            document.getElementById('sText').innerText = `${seireki}年 ／ ${kanshi.kanji}（${kanshi.yomi}）`;
-            document.getElementById('sDiff').innerText = getDiffText(seireki);
-            
-            // コピー用テキストをボタンに保存
-            const copyFormat = `${targetEra.name}${toKanjiYear(year)}（${seireki}）年`;
-            document.getElementById('sCopyBtn').dataset.copyText = copyFormat;
+    const resultBox = document.getElementById('seirekiResult');
+    const errorBox = document.getElementById('sError');
 
-            resultBox.style.display = 'block';
+    if (!gengoName) return hide(resultBox, errorBox);
+
+    let targetEra = null;
+    let startYear = 0;
+    let endYear = 0;
+
+    const eraIndex = eras.findIndex(era => era.name === gengoName);
+    if (eraIndex !== -1) {
+        targetEra = eras[eraIndex];
+        startYear = targetEra.start;
+        // 令和（現在の元号）以外は、次の元号の開始年を終了年とする
+        endYear = eraIndex === 0 ? currentYear + 50 : eras[eraIndex - 1].start;
+        
+        if (gengoName === "朱鳥") endYear = 687;
+        if (gengoName === "白雉") endYear = 655;
+        if (gengoName === "大化") endYear = 650;
+    } else {
+        const sIndex = southEras.findIndex(era => era.name === gengoName);
+        if (sIndex !== -1) {
+            targetEra = southEras[sIndex];
+            startYear = targetEra.start;
+            endYear = targetEra.end;
+        } else {
+            document.getElementById('sError').innerText = "※元号が見つかりません。";
+            return showError(resultBox, errorBox);
         }
+    }
 
-        // 論文用フォーマットでコピーする機能
-        function copyFormatResult(btnElement) {
-            const textToCopy = btnElement.dataset.copyText;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                const originalHTML = btnElement.innerHTML;
-                btnElement.innerHTML = "✓ コピーしました";
-                btnElement.style.backgroundColor = "var(--accent)";
-                btnElement.style.color = "#fff";
-                
-                setTimeout(() => {
-                    btnElement.innerHTML = originalHTML;
-                    btnElement.style.backgroundColor = "";
-                    btnElement.style.color = "";
-                }, 2000);
-            });
+    let seireki = null;
+    let eraYear = null;
+
+    if (!isNaN(yearNum) && yearNum >= 1) {
+        seireki = startYear + yearNum - 1;
+        eraYear = yearNum;
+        
+        // ★修正ポイント: 入力された年が元号の終了年を超えていないかチェック
+        if (seireki > endYear && eraIndex !== 0) {
+            let maxYear = endYear - startYear + 1;
+            document.getElementById('sError').innerText = `※${gengoName}は${maxYear}年までしかありません。`;
+            return showError(resultBox, errorBox);
         }
-    </script>
+        
+        if (zodiacStr.length >= 2) {
+            const actualZodiac = getKanshi(seireki).kanji;
+            if (actualZodiac !== zodiacStr.substring(0, 2)) {
+                document.getElementById('sError').innerText = `※不一致: ${gengoName}${yearNum}年は「${actualZodiac}」です。`;
+                return showError(resultBox, errorBox);
+            }
+        }
+    } else if (zodiacStr.length >= 2) {
+        let foundYear = -1;
+        for (let y = startYear; y <= endYear; y++) {
+            if (getKanshi(y).kanji === zodiacStr.substring(0, 2)) {
+                foundYear = y;
+                break;
+            }
+        }
+        
+        if (foundYear === -1) {
+            document.getElementById('sError').innerText = "※その元号の期間内に指定の干支は見つかりません。";
+            return showError(resultBox, errorBox);
+        }
+        seireki = foundYear;
+        eraYear = foundYear - startYear + 1;
+    } else {
+        return hide(resultBox, errorBox);
+    }
 
-    <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-      navigator.serviceWorker.register('./sw.js').then(function(registration) {
-        console.log('ServiceWorker registration successful with scope: ', registration.scope);
-      }, function(err) {
-        console.log('ServiceWorker registration failed: ', err);
-      });
+    const kanshi = getKanshi(seireki);
+    
+    // 「元年」か「数字」かだけを判定して「年」はつけないでおく
+    const yearNumStr = eraYear === 1 ? "元" : eraYear; 
+    
+    // ご希望のフォーマットに合体して、最後に「年」をつける！
+    document.getElementById('sText').innerText = `${seireki}年 ／ ${targetEra.name}${yearNumStr} ${kanshi.kanji}（${kanshi.yomi}）年`;
+    document.getElementById('sDiff').innerText = getDiffText(seireki);
+    document.getElementById('sCopyBtn').dataset.copyText = `${targetEra.name}${toKanjiYear(eraYear)}（${seireki}）年`;    
+    showResult(resultBox, errorBox);
+}
+
+function hide(resultBox, errorBox) {
+    resultBox.style.display = 'none';
+    errorBox.style.display = 'none';
+}
+
+function showError(resultBox, errorBox) {
+    resultBox.style.display = 'none';
+    errorBox.style.display = 'block';
+}
+
+function showResult(resultBox, errorBox) {
+    errorBox.style.display = 'none';
+    resultBox.style.display = 'block';
+}
+
+function copyFormatResult(btnElement) {
+    navigator.clipboard.writeText(btnElement.dataset.copyText).then(() => {
+        const originalHTML = btnElement.innerHTML;
+        btnElement.innerHTML = "✓ コピー完了";
+        btnElement.style.backgroundColor = "var(--accent)";
+        btnElement.style.color = "#fff";
+        setTimeout(() => {
+            btnElement.innerHTML = originalHTML;
+            btnElement.style.backgroundColor = "";
+            btnElement.style.color = "";
+        }, 2000);
     });
-  }
-</script>
-
+}
+    </script>
+    
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('./sw.js').catch(function(err) {
+            console.log('ServiceWorker error: ', err);
+          });
+        });
+      }
+    </script>
 </body>
-
 </html>
