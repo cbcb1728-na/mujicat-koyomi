@@ -9,7 +9,6 @@
     <meta name="apple-mobile-web-app-title" content="干支変換">
     <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
-    
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     
@@ -21,8 +20,8 @@
             --text-main: #334155;
             --text-muted: #94a3b8;
             --input-bg: #f1f5f9;
-            --accent: #3b82f6;
-            --accent-hover: #2563eb;
+            --accent: #1e88e5; 
+            --accent-hover: #1976d2;
             --error: #ef4444;
             --border: #e2e8f0;
         }
@@ -34,8 +33,8 @@
                 --text-main: #f8fafc;
                 --text-muted: #94a3b8;
                 --input-bg: #334155;
-                --accent: #60a5fa;
-                --accent-hover: #3b82f6;
+                --accent: #42a5f5; 
+                --accent-hover: #64b5f6;
                 --border: #334155;
             }
         }
@@ -92,7 +91,7 @@
 
         .input-group {
             display: flex;
-            gap: 8px;
+            gap: 6px; /* プルダウンが増えたので隙間を少し詰める */
             align-items: center;
             margin-bottom: 10px;
         }
@@ -104,10 +103,11 @@
             white-space: nowrap;
         }
 
-        input[type="number"], input[type="text"] {
+        /* ここに select を追加して、プルダウンも同じデザインに！ */
+        input[type="number"], input[type="text"], select {
             flex: 1;
             min-width: 0;
-            padding: 12px 10px;
+            padding: 12px 6px; /* スマホでも見やすいように左右の余白を少し調整 */
             font-size: 0.9rem;
             border: 2px solid transparent;
             border-radius: 12px;
@@ -116,13 +116,35 @@
             transition: all 0.2s ease;
             box-sizing: border-box;
             text-align: center;
+            /* プルダウンの見た目をすっきりさせる */
+            appearance: none;
+            -webkit-appearance: none;
         }
         
-        input:focus {
+        /* プルダウン専用の微調整 */
+        select {
+            text-align-last: center; /* プルダウンの文字を強制的に中央揃えにする */
+            padding: 10px 2px; /* 上下の余白を少し減らして小ぶりにする */
+            font-size: 0.85rem; /* 文字をほんの少し小さくして上品に */
+            cursor: pointer; /* マウスを乗せたときに指マークにする */
+        }
+
+        /* ▼ 未選択（空っぽ）の時は、元号のプレースホルダーと同じ薄い色にする ▼ */
+        select:invalid {
+            color: var(--text-muted);
+        }
+        
+        /* ▼ ただし、開いたときの選択肢（甲・乙など）は通常の濃い色にする ▼ */
+        select option {
+            color: var(--text-main);
+        }
+
+        /* ここにも select:focus を追加 */
+        input:focus, select:focus {
             outline: none;
             border-color: var(--accent);
             background-color: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 0 4px rgba(139, 122, 124, 0.15); /* 紅グレーの光 */
         }
 
         .result-wrapper {
@@ -187,8 +209,7 @@
             color: var(--text-muted);
             margin-top: 20px;
             line-height: 1.6;
-            text-align: left;
-            padding: 12px 16px; /* 上下・左右に少し余白を作る */
+            text-align: left; 
         }
     </style>
 </head>
@@ -214,7 +235,22 @@
             <h2>和暦 から 西暦 へ</h2>
             <div class="input-group">
                 <input type="text" id="gengoInput" placeholder="元号" style="flex: 1.2;">
-                <input type="text" id="zodiacInput" placeholder="干支" style="flex: 1.2;">
+                
+                <select id="jikkanSelect" style="flex: 0.7;" required>
+                    <option value="">十干</option>
+                    <option value="甲">甲</option><option value="乙">乙</option><option value="丙">丙</option>
+                    <option value="丁">丁</option><option value="戊">戊</option><option value="己">己</option>
+                    <option value="庚">庚</option><option value="辛">辛</option><option value="壬">壬</option>
+                    <option value="癸">癸</option>
+                </select>
+                <select id="junishiSelect" style="flex: 0.7;" required>
+                    <option value="">十二支</option>
+                    <option value="子">子</option><option value="丑">丑</option><option value="寅">寅</option>
+                    <option value="卯">卯</option><option value="辰">辰</option><option value="巳">巳</option>
+                    <option value="午">午</option><option value="未">未</option><option value="申">申</option>
+                    <option value="酉">酉</option><option value="戌">戌</option><option value="亥">亥</option>
+                </select>
+                
                 <input type="number" id="warekiInput" placeholder="年数" style="flex: 1;">
                 <span>年</span>
             </div>
@@ -236,7 +272,7 @@
     <script>
 const currentYear = new Date().getFullYear();
 
-// 統一・北朝系の元号リスト（変更なし）
+// 統一・北朝系の元号リスト
 const eras = [
     { name: "令和", start: 2019 }, { name: "平成", start: 1989 }, { name: "昭和", start: 1926 }, { name: "大正", start: 1912 }, { name: "明治", start: 1868 },
     { name: "慶応", start: 1865 }, { name: "元治", start: 1864 }, { name: "文久", start: 1861 }, { name: "万延", start: 1860 }, { name: "安政", start: 1854 },
@@ -288,7 +324,7 @@ const eras = [
     { name: "大宝", start: 701 }, { name: "朱鳥", start: 686 }, { name: "白雉", start: 650 }, { name: "大化", start: 645 }
 ];
 
-// 南朝独自の元号（変更なし）
+// 南朝独自の元号
 const southEras = [
     { name: "元中", start: 1384, end: 1392 }, { name: "弘和", start: 1381, end: 1384 }, { name: "天授", start: 1375, end: 1381 }, { name: "文中", start: 1372, end: 1375 },
     { name: "建徳", start: 1370, end: 1372 }, { name: "正平", start: 1346, end: 1370 }, { name: "興国", start: 1340, end: 1346 }, { name: "延元", start: 1336, end: 1340 }
@@ -319,10 +355,18 @@ window.onload = () => {
     convertToSeirekiUnified();
 };
 
+// ▼ 監視カメラ（イベントリスナー）の設定 ▼
+// 西暦側の監視
 document.getElementById('seirekiInput').addEventListener('input', convertToWareki);
-document.getElementById('gengoInput').addEventListener('input', convertToSeirekiUnified);
-document.getElementById('zodiacInput').addEventListener('input', convertToSeirekiUnified);
-document.getElementById('warekiInput').addEventListener('input', convertToSeirekiUnified);
+
+// 和暦側の監視（プルダウンの「change」も監視する）
+['gengoInput', 'warekiInput', 'jikkanSelect', 'junishiSelect'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', convertToSeirekiUnified);
+        el.addEventListener('change', convertToSeirekiUnified); // 追加
+    }
+});
 
 // 干支とその読み方を取得する関数
 function getKanshi(year) {
@@ -359,12 +403,13 @@ function convertToWareki() {
 
     let mainEraStr = "";
     let copyText = "";
+    let eraName = "";
+    let eraYear = 0;
 
     if (isBlank) {
         mainEraStr = "（元号なし）";
         copyText = `（${year}）年`;
     } else {
-        let eraName = "", eraYear = 0;
         for (let i = 0; i < eras.length; i++) {
             if (year >= eras[i].start) {
                 eraName = eras[i].name;
@@ -387,14 +432,18 @@ function convertToWareki() {
         }
     }
 
-    let displayText = mainEraStr;
-    if (southEraStr) {
-        displayText = `北朝: ${mainEraStr}<br>南朝: ${southEraStr}`;
-    }
-
     const kanshi = getKanshi(year);
-    // 読み方（フリガナ）を追加表示
-    document.getElementById('wText').innerHTML = `${displayText} ／ ${kanshi.kanji}（${kanshi.yomi}）`;
+    const eraNumStr = eraYear === 1 ? "元" : eraYear;
+
+    if (isBlank) {
+        document.getElementById('wText').innerHTML = `${year}年 ／ （元号なし） ${kanshi.kanji}（${kanshi.yomi}）年`;
+    } else if (southEraStr) {
+        document.getElementById('wText').innerHTML = `北朝: ${year}年 ／ ${eraName}${eraNumStr} ${kanshi.kanji}（${kanshi.yomi}）年<br>南朝: ${southEraStr}`;
+    } else {
+        // 西暦から和暦も1行のフォーマットに統一！
+        document.getElementById('wText').innerHTML = `${year}年 ／ ${eraName}${eraNumStr} ${kanshi.kanji}（${kanshi.yomi}）年`;
+    }
+    
     document.getElementById('wDiff').innerText = getDiffText(year);
     document.getElementById('wCopyBtn').dataset.copyText = copyText;
     showResult(resultBox, errorBox);
@@ -403,7 +452,10 @@ function convertToWareki() {
 // 2. 和暦・干支 → 西暦
 function convertToSeirekiUnified() {
     const gengoName = document.getElementById('gengoInput').value.trim();
-    const zodiacStr = document.getElementById('zodiacInput').value.trim();
+    const jikkanVal = document.getElementById('jikkanSelect').value;
+    const junishiVal = document.getElementById('junishiSelect').value;
+    const zodiacStr = jikkanVal + junishiVal;
+    
     const yearNum = parseInt(document.getElementById('warekiInput').value);
 
     const resultBox = document.getElementById('seirekiResult');
@@ -444,7 +496,6 @@ function convertToSeirekiUnified() {
         seireki = startYear + yearNum - 1;
         eraYear = yearNum;
         
-        // ★修正ポイント: 入力された年が元号の終了年を超えていないかチェック
         if (seireki > endYear && eraIndex !== 0) {
             let maxYear = endYear - startYear + 1;
             document.getElementById('sError').innerText = `※${gengoName}は${maxYear}年までしかありません。`;
@@ -478,11 +529,8 @@ function convertToSeirekiUnified() {
     }
 
     const kanshi = getKanshi(seireki);
-    
-    // 「元年」か「数字」かだけを判定して「年」はつけないでおく
     const yearNumStr = eraYear === 1 ? "元" : eraYear; 
     
-    // ご希望のフォーマットに合体して、最後に「年」をつける！
     document.getElementById('sText').innerText = `${seireki}年 ／ ${targetEra.name}${yearNumStr} ${kanshi.kanji}（${kanshi.yomi}）年`;
     document.getElementById('sDiff').innerText = getDiffText(seireki);
     document.getElementById('sCopyBtn').dataset.copyText = `${targetEra.name}${toKanjiYear(eraYear)}（${seireki}）年`;    
@@ -530,4 +578,3 @@ function copyFormatResult(btnElement) {
     </script>
 </body>
 </html>
-
