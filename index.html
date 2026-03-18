@@ -20,9 +20,9 @@
             --text-main: #334155;
             --text-muted: #94a3b8;
             --input-bg: #f1f5f9;
-            --accent: #1e88e5; 
-            --accent-hover: #1976d2;
-            --error: #ef4444;
+            --accent: #5076aa; 
+            --accent-hover: #3c5d8a; 
+            --error: #995c58;             
             --border: #e2e8f0;
         }
 
@@ -33,8 +33,9 @@
                 --text-main: #f8fafc;
                 --text-muted: #94a3b8;
                 --input-bg: #334155;
-                --accent: #42a5f5; 
-                --accent-hover: #64b5f6;
+                --accent: #7ca1d6; 
+                --accent-hover: #9bbdf0; 
+                --error: #c6918e;               
                 --border: #334155;
             }
         }
@@ -103,7 +104,6 @@
             white-space: nowrap;
         }
 
-        /* ここに select を追加して、プルダウンも同じデザインに！ */
         input[type="number"], input[type="text"], select {
             flex: 1;
             min-width: 0;
@@ -140,11 +140,11 @@
         }
 
         /* ここにも select:focus を追加 */
-        input:focus, select:focus {
+            input:focus, select:focus {
             outline: none;
             border-color: var(--accent);
             background-color: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(139, 122, 124, 0.15); /* 紅グレーの光 */
+            box-shadow: 0 0 0 4px rgba(80, 118, 170, 0.2); 
         }
 
         .result-wrapper {
@@ -355,11 +355,9 @@ window.onload = () => {
     convertToSeirekiUnified();
 };
 
-// ▼ 監視カメラ（イベントリスナー）の設定 ▼
-// 西暦側の監視
+
 document.getElementById('seirekiInput').addEventListener('input', convertToWareki);
 
-// 和暦側の監視（プルダウンの「change」も監視する）
 ['gengoInput', 'warekiInput', 'jikkanSelect', 'junishiSelect'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -368,7 +366,6 @@ document.getElementById('seirekiInput').addEventListener('input', convertToWarek
     }
 });
 
-// 干支とその読み方を取得する関数
 function getKanshi(year) {
     const jIndex = year % 10;
     const juIndex = year % 12;
@@ -440,7 +437,6 @@ function convertToWareki() {
     } else if (southEraStr) {
         document.getElementById('wText').innerHTML = `北朝: ${year}年 ／ ${eraName}${eraNumStr} ${kanshi.kanji}（${kanshi.yomi}）年<br>南朝: ${southEraStr}`;
     } else {
-        // 西暦から和暦も1行のフォーマットに統一！
         document.getElementById('wText').innerHTML = `${year}年 ／ ${eraName}${eraNumStr} ${kanshi.kanji}（${kanshi.yomi}）年`;
     }
     
