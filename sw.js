@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'mujineko-viewer-v1';
+const CACHE_NAME = 'koyomi-muji-v2';
 const urlsToCache = [
   './index.html',
   './manifest.json',
@@ -9,11 +9,31 @@ const urlsToCache = [
 
 // インストール時にファイルをキャッシュ
 self.addEventListener('install', function(event) {
+
+  self.skipWaiting(); 
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
         return cache.addAll(urlsToCache);
       })
+  );
+});
+
+// 追加：新しいバージョンになったら、古いキャッシュを削除
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          // 現在の CACHE_NAME（v2）以外の古いキャッシュを見つけたら消す
+          if (cacheName !== CACHE_NAME) {
+            console.log('古いキャッシュを削除しました:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 
@@ -28,5 +48,4 @@ self.addEventListener('fetch', function(event) {
         return fetch(event.request); // ネットワークから取得
       })
   );
-
 });
